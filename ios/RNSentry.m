@@ -131,7 +131,14 @@ RCT_EXPORT_METHOD(startWithDsnString:(NSString * _Nonnull)dsnString
 {
     NSError *error = nil;
     self.moduleMapping = [[NSMutableDictionary alloc] init];
-    SentryClient *client = [[SentryClient alloc] initWithDsn:dsnString didFailWithError:&error];
+    
+    SentryClient *client = nil;
+    if (!SentryClient.sharedClient) {
+        client = [[SentryClient alloc] initWithDsn:dsnString didFailWithError:&error];
+    } else {
+        client = SentryClient.sharedClient;
+    }
+
     client.beforeSerializeEvent = ^(SentryEvent * _Nonnull event) {
         [self injectReactNativeFrames:event];
         [self setReleaseVersionDist:event];
